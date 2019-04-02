@@ -1,0 +1,8 @@
+div{
+	margin: 0 auto;
+}
+
+div.map{
+	width: 800px;
+	height: 800px;
+}
