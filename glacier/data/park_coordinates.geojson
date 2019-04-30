@@ -1,0 +1,17 @@
+{
+  "type": "FeatureCollection",
+  "name": "parks",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -113.7744140625,
+          48.65831447771188
+        ]
+      }
+    }
+  ]
+}
