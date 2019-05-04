@@ -1,70 +1,25 @@
 //source code from: https://www.w3schools.com/howto/howto_js_autocomplete.asp
 
 $("div.autocomplete").html("\
-  <form action='/action_page.php'>\
+  <form name = 'search'>\
     <div id = 'input'><input id='myInput' type='text' name='park' placeholder='Park'> </div>\
   </form>");
 
 
 
-  var parks = ["Acadia National Park",
-"Arches National Park",
-"Badlands National Park",
-"Big Bend National Park",
-"Biscayne National Park",
-"Black Canyon of the Gunnison National Park",
-"Bryce Canyon National Park",
-"Canyonlands National Park",
-"Capitol Reef National Park",
-"Carlsbad Caverns National Park",
-"Channel Islands National Park",
-"Congaree National Park",
-"Crater Lake National Park",
-"Cuyahoga Valley National Park",
-"Death Valley National Park",
-"Denali National Park",
-"Dry Tortugas National Park",
-"Everglades National Park",
-"Gates of the Arctic National Park",
-"Glacier Bay National Park",
-"Glacier National Park",
-"Grand Canyon National Park",
-"Grand Teton National Park",
-"Great Basin National Park",
-"Great Sand Dunes National Park",
-"Great Smoky Mountains National Park",
-"Guadalupe Mountains National Park",
-"Haleakala National Park",
-"Hawaii Volcanoes National Park",
-"Hot Springs National Park",
-"Isle Royale National Park",
-"Joshua Tree National Park",
-"Katmai National Park",
-"Kenai Fjords National Park",
-"Kings Canyon National Park",
-"Kobuk Valley National Park",
-"Lake Clark National Park",
-"Lassen Volcanic National Park",
-"Mammoth Cave National Park",
-"Mesa Verde National Park",
-"Mount Rainier National Park",
-"National Park of American Samoa",
-"North Cascades National Park",
-"Olympic National Park",
-"Petrified Forest National Park",
-"Redwood National Park",
-"Rocky Mountain National Park",
-"Saguaro National Park",
-"Sequoia National Park",
-"Shenandoah National Park",
-"Theodore Roosevelt National Park",
-"Virgin Islands National Park",
-"Voyageurs National Park",
-"Wind Cave National Park",
-"Wrangell-St. Elias National Park",
-"Yellowstone National Park",
-"Yosemite National Park",
-"Zion National Park"]
+  var parks = ["Acadia National Park", "Arches National Park",
+  "Badlands National Park", "Big Bend National Park", "Bryce Canyon National Park", 
+"Canyonlands National Park", "Capitol Reef National Park", "Carlsbad Caverns National Park",
+"Channel Islands National Park", "Crater Lake National Park", "Cuyahoga Valley National Park",
+"Death Valley National Park", "Denali National Park", "Everglades National Park",
+"Glacier Bay National Park", "Glacier National Park", "Grand Canyon National Park",
+"Grand Teton National Park", "Great Smoky Mountains National Park", "Haleakala National Park",
+"Hawai'i Volcanoes National Park", "Joshua Tree National Park", "Kings Canyon National Park",
+"Lassen Volcanic National Park", "Mesa Verde National Park", "Mount Rainier National Park",
+"Olympic National Park", "Petrified Forest National Park", "Pinnacles National Park",
+"Redwood National Park", "Rocky Mountain National Park", "Saguaro National Park",
+"Sequoia National Park", "Shenandoah National Park", "Virgin Islands National Park",
+"Yellowstone National Park", "Yosemite National Park", "Zion National Park"]
 
   //search & autocomplete feature
   //inp: what user has currently typed in
@@ -164,6 +119,5 @@ $("div.autocomplete").html("\
     });
 
   }
-
 
 window.onload(search(document.getElementById("myInput"), parks));

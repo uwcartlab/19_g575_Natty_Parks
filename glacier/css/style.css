@@ -4,7 +4,8 @@ div{
 
 div.map{
 	height: 500px;
-	width: 80% ;
+	width: 60% ;
+	border: solid gray 2px;
 }
 
 div.autocomplete {
@@ -59,4 +60,62 @@ circle {
   fill: #fff;
   fill-opacity: 0.4;
   stroke: #111;
+}
+
+div.parkname {
+	text-align: center;
+/*    position: relative;
+  	display: inline-block; */
+	font: 30px Arial;
+}
+
+
+
+
+#nextbutton {
+	float: right;
+    text-decoration: none;
+  	display: inline-block;
+  	padding: 8px 16px;
+  	background-color:#FFFFFF;
+  	border:0.16em solid #000000;
+  	box-sizing: border-box;
+}
+
+#nextbutton:hover {
+	background-color:#DDDDDD;
+}
+
+#previousbutton {
+	float: left;
+    text-decoration: none;
+  	display: inline-block;
+  	padding: 8px 16px;
+  	background-color:#FFFFFF;
+  	border:0.16em solid #000000;
+  	box-sizing: border-box;
+}
+
+#previousbutton:hover {
+	background-color:#DDDDDD;
+}
+
+
+div.next {
+	position:absolute;
+    bottom:0;
+    right:0;
+    font: 20px Arial;
+
+}
+div.previous {
+	position:absolute;
+    bottom:0;
+    left:0;
+    font: 20px Arial;
+
+}
+
+div.loading {
+	font: 20px Arial;
 }
