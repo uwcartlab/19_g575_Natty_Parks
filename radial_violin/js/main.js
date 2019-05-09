@@ -42,7 +42,7 @@ var parkNames = [
   "Grand_Canyon_National_Park",
   "Mesa_Verde_National_Park",
   "Virgin_Islands_National_Park",
-  "Hawai'i_Volcanoes_National_Park",
+  `Hawai'i_Volcanoes_National_Park`,
   "Cuyahoga_Valley_National_Park",
   "Glacier_Bay_National_Park",
   "Denali_National_Park"
@@ -78,7 +78,7 @@ var parkNames = [
   "Rocky_Mountain_National_Park",
   "Arches_National_Park",
   "Mesa_Verde_National_Park",
-  "Hawai'i_Volcanoes_National_Park",
+  `Hawai'i_Volcanoes_National_Park`,
   "Cuyahoga_Valley_National_Park",
   "Glacier_Bay_National_Park",
   "Denali_National_Park"
@@ -111,6 +111,14 @@ var colorScale2 = d3.scaleSequential(myInterpolator)
 var logScale = d3.scaleLog()
           .range([.35,1]);
 
+d3.select("div.violinPhoto")
+        .on("mouseover", function(d){
+          d3.select(this).style("opacity",1)
+        })
+        .on("mouseout", function(d){
+          d3.select(this).style("opacity",0.8)
+        });
+
 //function that makes projection based on park coordinates
 function getProjection(park) {
 
@@ -121,6 +129,7 @@ function getProjection(park) {
   var height = coords[2][1] - coords[1][1];
   var parallel_one = coords[1][1] + (1/3)*(height);
   var parallel_two = coords[1][1] + (2/3)*(height);
+
 
   projection = d3.geoConicEqualArea()
                       .parallels([parallel_one, parallel_two])
@@ -247,7 +256,7 @@ function drawBoundary(parkBoundary) {
       .append("path")
       .attr("d", path)
       .attr("fill", "none")
-      .attr("stroke", "#aaa")
+      .attr("stroke", "#888")
       .attr("stroke-width", 1)
       .style("filter", "url(#glow)");
 
@@ -286,7 +295,7 @@ function displayInfo(park) {
 
   //display park name at top, and update previous/next buttons
   $("div.parkname").html("");
-  $("div.parkname").append(park);
+  $("div.parkname").append(park.replace(/_/g, " "));
   $("div.next").html("");
   $("div.previous").html("");
   if (next != "") $("div.next").append('<button class="skip" id="nextbutton">Next (' + next + ')</button>');
@@ -301,9 +310,10 @@ function displayInfo(park) {
 window.makeMap = function(park_name) {
 
   //make sure violin is hidden
-  violinGroup.attr("opacity", 0);
+  violinGroup.attr("opacity", 0).style("pointer-events", "none");
   d3.select("#violin").attr("opacity", 0);
   d3.select("#violin").style("opacity", 0);
+  d3.select("div.violinPhoto").style("opacity", 0.8).style("pointer-events", "auto");
 
 
   var ind = parkNames.indexOf(park_name.replace( / /g, "_"));
@@ -318,36 +328,6 @@ window.makeMap = function(park_name) {
 
   displayInfo(park_name);
 
-
-
-
-
-/*
-  svg.selectAll("path").remove(); //clear map
-  var filename = park_name.replace( / /g, "_") + ".json"; //get filename
-  Promise.all([
-    d3.json("../flickr_scrape/scraper/input_data/parks.json"),
-    d3.json("../flickr_scrape/scraper/input_data/boxes.geojson"),
-    d3.json("../flickr_scrape/data/" + filename),
-  ]).then(function([parks, boxes, photos]) {
-          
-          //find park in the json file, and get projection
-          for (var i = 0; i < parks.features.length; i = i+1) {
-            if (parks.features[i].properties.UNIT_NAME === park_name) getProjection(boxes.features[i]);
-          }
-          loadPark(parks);
-          loadPhotos(photos);
-          svg.selectAll("path")
-          .call(d3.zoom().on("zoom", function () {
-              svg.selectAll("path").attr("transform", d3.event.transform);
-              svg.selectAll("g").attr("transform", d3.event.transform);
-            }));
-          $("div.loading").html("");
-          });
-          $("div.loading").append("loading...");
-          displayInfo(park_name);
-
-          */
 } 
 
 
@@ -363,18 +343,18 @@ for(var i = 0; i < 5000; i++){
 
     cloudData.push({
       "uniqueId": i,
-      "r": 3 + Math.random()*0.3
+      "r": 2 + Math.random()*0.3
     });
 
     if(i<200){
     smallCloudData.push({
       "uniqueId": i,
-      "r": 3 + Math.random()*0.3
+      "r": 2 + Math.random()*0.3
     });
     } else {
       bigCloudData.push({
       "uniqueId": i,
-      "r": 3 + Math.random()*0.3
+      "r": 2 + Math.random()*0.3
     });
     }
 
@@ -688,24 +668,42 @@ for(var i; i<sumstat.length; i++){
     yNum.domain([0, 0.5]);
     xScale.domain(sumstat[i].xDom);
 
+
+//build groups
     var parkGroup =  violinGroup.append("g")
            .datum(sumstat[i])
               .attr("class", function(d){
                         return d.key;
                     })
+              .style("cursor", "pointer")
               .attr("parkLength", function(d){
                         return d.parkLength;
               })
               .attr("id", "violin")
                     .attr("transform", function(d){
-                        return `rotate(${i*rotateConst + rotateConst/2} ${w/2} ${h/2})
+                        return `rotate(${i*rotateConst + rotateConst/2 - 90} ${w/2} ${h/2})
                                 translate(${w/2} ${h/2})`;
+                    })
+              .on("click", function(d){
+                        if(!highlight){
+                          var park = d.key;
+                         // console.log(park);
+                        }
+                    })
+              .on("mouseover", function(d){
+                      var park = d.key;
+                        d3.select(this).select("path").attr("fill-opacity", 1);
+                    })
+              .on("mouseout", function(d){
+                      var park = d.key;
+                        d3.select(this).select("path").attr("fill-opacity", 0.7);
                     });
 
             parkGroup.append("path")
                 .datum(function(d){ return(d.value)})     // So now we are working bin per bin
                     .style("stroke", "none")
-                    .style("fill","#7781BA")
+                    .style("fill","#c9d1ff")
+                    .attr("fill-opacity", 0.7)
                     .attr("d", d3.area()
                                         .y0(function(d){ 
                                           return(-1*yNum(d.length/length));
@@ -717,16 +715,11 @@ for(var i; i<sumstat.length; i++){
                                           return(xScale(d.x0)); 
                                         })
                                         .curve(d3.curveCatmullRom)
-                                        )
-                    .on("click", function(d){
-                        if(!highlight){
-                          var park = d3.select(this.parentNode).attr("class");
-                          console.log(park);
-                        }
-                    });
+                                        );                  
 
-
-              parkGroup.append("g")      
+//add park labels
+              parkGroup.append("g") 
+                          .attr("class", "parkLabel")     
                         .append("text")
                           .attr("x", r+5)
                           .attr("y", 0)
@@ -738,7 +731,7 @@ for(var i; i<sumstat.length; i++){
                             return d.key.replace(/_/g, " ").replace("National Park", "");
                           })
                           .attr("transform", function(d){
-                                var a = i*rotateConst + rotateConst/2;
+                                var a = i*rotateConst + rotateConst/2 - 90;
                                 if(a>90 && a <= 270){
                                   var length = d3.select(this).node().getComputedTextLength();
                                   console.log(length);
@@ -748,6 +741,8 @@ for(var i; i<sumstat.length; i++){
                                           translate(${tran})`;
                                 }     
                           });
+
+
 
 
 /*
@@ -763,8 +758,61 @@ for(var i; i<sumstat.length; i++){
 
 }
 
+//add empty pie chart for larger footprint
 
+function makePie(){
 
+var pie = d3.pie()
+          .value(function(d){
+            return d.value;
+          })
+          .sort(null);
+
+var parkPieData = [];
+for(var park of parkNames){
+    parkPieData.push({
+      "name": park,
+      "value": 1
+    })
+}
+
+ parkPieData = pie(parkPieData);
+
+var piePath = d3.arc()
+    .outerRadius(r)
+    .innerRadius(0);
+
+var pieArc = violinGroup.selectAll(".pieArc")
+                      .data(parkPieData)
+                      .enter()
+                      .append("g")
+                          .attr("cursor", "pointer")
+                          .attr("transform", "translate(" + (w/2) + "," + (h/2) + ")")
+                          .attr("fill-opacity", 0)
+                          .attr("stroke-opacity", 0)
+                          .attr("fill", "#000")
+                          .attr("stroke", "#c9d1ff")
+                          .attr("stroke-width", 0.25)
+                          .attr("class", "arc")
+                      .append("path")
+                          .attr("d", piePath)
+                          .on("click", function(d){
+                            makeMap(d.data.name);
+                          })
+                          .on("mouseover", function(d){
+                             d3.select(`g.${d.data.name}`).select("path").attr("fill-opacity", 1);
+                             d3.select(`g.${d.data.name}`).select("g.parkLabel").select("text").attr("opacity", 1);
+                            // d3.select(this).attr("stroke-opacity", 1);
+                             
+                                })
+                          .on("mouseout", function(d){
+                             d3.select(`g.${d.data.name}`).select("path").attr("fill-opacity", 0.7);
+                             d3.select(`g.${d.data.name}`).select("g.parkLabel").select("text").attr("opacity", 0.6);
+                            //  d3.select(this).attr("stroke-opacity", 0);
+                                });
+}
+
+makePie();
 
 
 

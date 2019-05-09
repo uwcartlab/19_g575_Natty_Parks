@@ -220,6 +220,13 @@ div.autocomplete-active {
 	background-color:#DDDDDD;
 }
 
+div.parkname {
+  position: absolute;
+  font-size: 1.5em;
+  width: 200px;
+  left: 40%;
+  top: 10px;
+}
 
 div.next {
 	position:absolute;
@@ -241,9 +248,24 @@ div.loading {
 }
 
 
+div.violinPhoto {
+  position: absolute;
+  left: 25px;
+  top: 50px;
+  width: 150px;
+  height: 150px;
+  background-image: url("../img/violin.png");
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  pointer-events: none;
+}
 
-
-
+div.violinPhoto p {
+  margin-top: -15px;
+  font-size: 12px;
+  text-align: center;
+}
 
 
 
