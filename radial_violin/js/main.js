@@ -1,9 +1,11 @@
 function wrapper(){
 
+var sumstat;
 var boundaries;
 var boxes;
 var parkChar;
 var boundary, path, pathPoint, projection;
+var mapViolin;
 
 var allParkNames  = [];
 //parks with over 5,000 photos
@@ -116,8 +118,26 @@ d3.select("div.violinPhoto")
           d3.select(this).style("opacity",1)
         })
         .on("mouseout", function(d){
-          d3.select(this).style("opacity",0.8)
+          if(highlight){
+             d3.select(this).style("opacity",0.8);
+          }
+         
+        }).on("click", function(d){
+              backToViolin();
         });
+
+function backToViolin(){
+    highlight = false;
+
+    violinGroup.attr("opacity", 1).style("pointer-events", "auto");
+    mapGroup.attr("opacity", 0).style("pointer-events", "none");
+    d3.select("div.mapInfo").style("opacity", 0);
+    d3.select("div.violinPhoto").style("pointer-events", "none").style("opacity", 0);
+    mapViolin.remove();
+    d3.selectAll(".mapViolin").remove();
+
+}
+
 
 //function that makes projection based on park coordinates
 function getProjection(park) {
@@ -274,9 +294,107 @@ function drawBoundary(parkBoundary) {
            
 }
 
+function drawMapViolin(photos){
+
+    console.log(photos);
+  
+  var xScale = d3.scaleLinear()
+                    .range([w/4, w-w/4]);
+
+  var yNum = d3.scaleSqrt()
+    .range([0, 75]);
+
+  var length = photos.parkLength;
+
+    //height of violin proportional to total
+    yNum.domain([0, 0.5]);
+    xScale.domain(photos.xDom);
+
+    //calculate max distance from road in miles
+  var max = (photos.xDom[1]*0.000621371).toFixed(0);
+
+//build groups
+       mapViolin =  mapGroup.append("g")
+           .datum(photos)
+              .attr("parkLength", function(d){
+                        return d.parkLength;
+              })
+              .attr("id", "mapViolin")
+                    .attr("transform", function(d){
+                        return `translate(0 ${h-h/15})`;
+                    });
+              // .on("mouseover", function(d){
+              //         var park = d.key;
+              //           d3.select(this).select("path").attr("fill-opacity", 1);
+              //       })
+              // .on("mouseout", function(d){
+              //         var park = d.key;
+              //           d3.select(this).select("path").attr("fill-opacity", 0.7);
+              //       });
+
+            mapViolin.append("path")
+                .datum(function(d){ return(d.value)})     // So now we are working bin per bin
+                    .style("stroke", "none")
+                    .style("fill","#c9d1ff")
+                    .attr("fill-opacity", 0.7)
+                    .attr("d", d3.area()
+                                        .y0(function(d){ 
+                                          return(-1*yNum(d.length/length));
+                                        })
+                                        .y1(function(d){ 
+                                          return(yNum(d.length/length)); 
+                                        })
+                                        .x(function(d){ 
+                                          return(xScale(d.x0)); 
+                                        })
+                                        .curve(d3.curveCatmullRom)
+                                        );
+
+
+                //remove previous
+                d3.selectAll(".mapViolin").remove();
+
+                var axis = mapViolin.append("rect")
+                          .attr("class", "mapViolin")
+                          .attr("width", w/2)
+                          .attr("height", 0.5)
+                          .attr("x", w/4)
+                          .attr("y", 0)
+                          .attr("fill", "#fff");
+
+                var labelLeft = d3.select("div.mapInfo")
+                                  .append("p")
+                                  .attr("class", "mapViolin")
+                                  .style("position", "absolute")
+                                  .style("left", w/4-55+"px")
+                                  .style("top",h-h/10+"px")
+                                  .style("width", "50px")
+                                  .style("font-size", "12px")
+                                  .style("text-align", "right")
+                                  .html(`0 miles from road`);
+
+                var labelRight = d3.select("div.mapInfo")
+                                  .append("p")
+                                  .attr("class", "mapViolin")
+                                  .style("position", "absolute")
+                                  .style("left", w-w/4+5+"px")
+                                  .style("top",h-h/10+"px")
+                                  .style("width", "50px")
+                                  .style("font-size", "12px")
+                                  .html(`${max} miles from road`);                
+
+
+}
+
+
+
+
+
 
 //add arrows
 function displayInfo(park) {
+
+  d3.select("div.mapInfo").style("opacity", 1);
 
   //(calculate previous and next park)
   var previous, next;
@@ -291,7 +409,7 @@ function displayInfo(park) {
 
 //TODO: display info: number of photos, visitors, area, miles of road, photo of park, violin plot?
 //this should probably all go on the left side
-  console.log(parkChar);
+  //console.log(parkChar);
 
   //display park name at top, and update previous/next buttons
   $("div.parkname").html("");
@@ -309,11 +427,15 @@ function displayInfo(park) {
 //whenever current park is updated, this function is called
 window.makeMap = function(park_name) {
 
+
+  highlight = true;
   //make sure violin is hidden
   violinGroup.attr("opacity", 0).style("pointer-events", "none");
+  mapGroup.attr("opacity", 1).style("pointer-events", "auto");
   d3.select("#violin").attr("opacity", 0);
   d3.select("#violin").style("opacity", 0);
   d3.select("div.violinPhoto").style("opacity", 0.8).style("pointer-events", "auto");
+  
 
 
   var ind = parkNames.indexOf(park_name.replace( / /g, "_"));
@@ -325,6 +447,7 @@ window.makeMap = function(park_name) {
   getProjection(boxes[boxInd]);
   drawBoundary(boundaries[boxInd]);
   drawPhotos(data[ind]);
+  drawMapViolin(sumstat[ind]);
 
   displayInfo(park_name);
 
@@ -592,7 +715,7 @@ var randomLogTransform = d3.scaleLog()
                    // .base(2)
                     .range([r,50]);
 
-  var sumstat = [];
+   sumstat = [];
 
     for(var j = 0; j < parkNames.length; j++){
 
