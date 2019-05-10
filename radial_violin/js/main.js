@@ -54,39 +54,38 @@ var parkNames = [
 ];
 
  parkNames = [
-  "Olympic_National_Park",
-  "Acadia_National_Park",
-  "Everglades_National_Park",
-  "Great_Smoky_Mountains_National_Park",
-  "Redwood_National_Park",
-  "Shenandoah_National_Park",
-  "Bryce_Canyon_National_Park",
-  "Yellowstone_National_Park",
-  "Sequoia_National_Park",
-  "Canyonlands_National_Park",
-  "Kings_Canyon_National_Park",
-  "Capitol_Reef_National_Park",
-  "Pinnacles_National_Park",
-  "Lassen_Volcanic_National_Park",
-  "Badlands_National_Park",
-  "Mount_Rainier_National_Park",
-  "Yosemite_National_Park",
-  "Haleakala_National_Park",
-  "Carlsbad_Caverns_National_Park",
-  "Zion_National_Park",
-  "Crater_Lake_National_Park",
-  "Glacier_National_Park",
-  "Saguaro_National_Park",
-  "Grand_Teton_National_Park",
-  "Petrified_Forest_National_Park",
-  "Big_Bend_National_Park",
-  "Rocky_Mountain_National_Park",
+ "Acadia_National_Park",
   "Arches_National_Park",
-  "Mesa_Verde_National_Park",
-  `Hawai'i_Volcanoes_National_Park`,
+  "Badlands_National_Park",
+  "Big_Bend_National_Park",
+  "Bryce_Canyon_National_Park",
+  "Canyonlands_National_Park",
+  "Capitol_Reef_National_Park",
+  "Carlsbad_Caverns_National_Park",
+  "Crater_Lake_National_Park",
   "Cuyahoga_Valley_National_Park",
+  "Denali_National_Park",
+  "Everglades_National_Park",
   "Glacier_Bay_National_Park",
-  "Denali_National_Park"
+  "Glacier_National_Park",
+  "Grand_Teton_National_Park",
+  "Great_Smoky_Mountains_National_Park",
+  "Haleakala_National_Park",
+  `Hawai'i_Volcanoes_National_Park`,
+  "Kings_Canyon_National_Park",
+  "Lassen_Volcanic_National_Park",
+  "Mesa_Verde_National_Park",
+  "Mount_Rainier_National_Park",
+  "Olympic_National_Park",
+  "Petrified_Forest_National_Park",
+  "Pinnacles_National_Park",
+  "Redwood_National_Park",
+  "Rocky_Mountain_National_Park", 
+  "Sequoia_National_Park",
+  "Shenandoah_National_Park",
+  "Yellowstone_National_Park",
+  "Yosemite_National_Park",
+  "Zion_National_Park"  
 ];
 
 
@@ -136,6 +135,7 @@ function backToViolin(){
     mapGroup.attr("opacity", 0).style("pointer-events", "none");
     d3.select("div.mapInfo").style("opacity", 0);
     d3.select("div.violinPhoto").style("pointer-events", "none").style("opacity", 0);
+    d3.select("p.centerText").style("opacity", 1);
     mapViolin.remove();
     d3.selectAll(".mapViolin").remove();
 
@@ -146,6 +146,7 @@ function backToViolin(){
 function getProjection(park,yellowstone) {
 
   console.log(park);
+  var name = park.properties["UNIT_NAME"];
 
   var center;
   var coords = park.geometry.coordinates[0];
@@ -167,6 +168,33 @@ function getProjection(park,yellowstone) {
                    //   .fitSize([w, h], park.geometry)
                       .center([0,center[1]])
                       .translate([w/2,h/2]);
+
+  if(name == "Crater Lake National Park"){
+    console.log("crater");
+
+     projection = d3.geoConicEqualArea()
+                      .parallels([parallel_one, parallel_two])
+                      .rotate([-center[0],0,0])
+                      .scale(65000 * (0.8/height))
+                   //   .fitSize([w, h], park.geometry)
+                      .center([0,center[1]])
+                      .translate([w/2,h/2-75]);
+
+  }
+
+  if(name == "Badlands National Park"){
+
+     projection = d3.geoConicEqualArea()
+                      .parallels([parallel_one, parallel_two])
+                      .rotate([-center[0],0,0])
+                      .scale(35000 * (0.8/height))
+                   //   .fitSize([w, h], park.geometry)
+                      .center([0,center[1]])
+                      .translate([w/2+75,h/2]);
+
+  }
+
+
 
   if(yellowstone){
     console.log("yellowstone");
@@ -222,44 +250,6 @@ function drawPhotos(photos) {
   radiusScale.domain(d3.extent(hexbin(photos),bin => bin.length));
   logScale.domain(d3.extent(hexbin(photos),bin => bin.length));
 
-//add points
-/*
-//will uncomment once we have distance data
-  mapGroup.selectAll(".photos")
-      .data(photos)
-      .enter()
-      .append("path")
-      .attr("fill", function(d){
-        return "#253494";})
-//       //   if(d.properties["100m"]){
-  
-//       //     return "#253494";
-//       //   } else if (d.properties["500m"]) {
-     
-//       //     return "#259458";
-//       //   } else if (d.properties["1000m"]) {
-      
-//       //     return "#259458";
-//       //   } 
-//       //   else if (d.properties["6000m"]) {
-        
-//       //     return "#259458";
-//       //   }else {
-      
-//       //     return "#929425";
-//       //   }
-//       // })
-            .attr("opacity", .5)
-            .attr("d", path.pointRadius(.5));
-
-mapGroup.selectAll(".photos")
-      .data(photos)
-      .enter()
-      .append("path")
-      .attr("fill", "white")
-            .attr("opacity", 1)
-            .attr("d", path.pointRadius(.15));
-          */  
 //hexagons:
   mapGroup.append("g")
         .attr("class", "hexagon")
@@ -275,40 +265,6 @@ mapGroup.selectAll(".photos")
           return colorScale(logScale(d.length));
         })
         .attr("opacity", 1);
-
-/*
-//small white hex
-  mapGroup.append("g")
-        .attr("class", "hexagon")
-        .selectAll(".whitehex")
-        .data(hexbin(photos))
-        .enter()
-        .append("path")
-        .attr("d", function(d){
-          return hexbin.hexagon(0.3);
-        })
-        .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-        .attr("fill", function(d){
-          return "#fff";
-        })
-        .attr("opacity", 0.9);
-   */     
-
-
-  //       svg.append("g")
-  //       .attr("class", "hexagon")
-  //       .selectAll(".hex")
-  //       .data(hexbin(photos))
-  //       .enter()
-  //       .append("path")
-  //       .attr("d", function(d){
-  //         return hexbin.hexagon(radiusScale(200));
-  //       })
-  //       .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-  //       .attr("opacity", function(d){
-  //         return logScale(d.length);
-  //       })
-  //       .attr("fill", "white");
 
 }
 
@@ -1199,7 +1155,13 @@ for(var i; i<sumstat.length; i++){
                                   //tran = ("10,10")
                                   return `rotate(180,0,0)
                                           translate(${tran})`;
-                                }     
+                                }
+                                if(d.key == "Badlands_National_Park" || d.key == "Big_Bend_National_Park"){
+                                    return "translate(12,12)";
+
+                                }
+
+
                           });
 
 
