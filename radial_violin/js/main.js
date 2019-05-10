@@ -47,7 +47,7 @@ var parkNames = [
   "Grand_Canyon_National_Park",
   "Mesa_Verde_National_Park",
   "Virgin_Islands_National_Park",
-  `Hawai'i_Volcanoes_National_Park`,
+  `Hawaii_Volcanoes_National_Park`,
   "Cuyahoga_Valley_National_Park",
   "Glacier_Bay_National_Park",
   "Denali_National_Park"
@@ -71,7 +71,7 @@ var parkNames = [
   "Grand_Teton_National_Park",
   "Great_Smoky_Mountains_National_Park",
   "Haleakala_National_Park",
-  `Hawai'i_Volcanoes_National_Park`,
+  `Hawaii_Volcanoes_National_Park`,
   "Kings_Canyon_National_Park",
   "Lassen_Volcanic_National_Park",
   "Mesa_Verde_National_Park",
@@ -138,6 +138,8 @@ function backToViolin(){
     d3.select("p.centerText").style("opacity", 1);
     mapViolin.remove();
     d3.selectAll(".mapViolin").remove();
+    d3.select("p.visitors").html("");
+    d3.select("p.area").html("");
 
 }
 
@@ -191,6 +193,18 @@ function getProjection(park,yellowstone) {
                    //   .fitSize([w, h], park.geometry)
                       .center([0,center[1]])
                       .translate([w/2+75,h/2]);
+
+  }
+
+  if(name == "Hawaii Volcanoes National Park"){
+
+     projection = d3.geoConicEqualArea()
+                      .parallels([parallel_one, parallel_two])
+                      .rotate([-center[0],0,0])
+                      .scale(28000 * (0.8/height))
+                   //   .fitSize([w, h], park.geometry)
+                      .center([0,center[1]])
+                      .translate([w/2,h/2]);
 
   }
 
@@ -638,16 +652,23 @@ function displayInfo(park) {
     }
   }
 
-console.log(parkChar);
 var parkCharNames = parkChar.map(park=>park.Area_Name);
+console.log(parkCharNames);
+var parkCharInd = parkCharNames.indexOf(park.replace( / /g, "_"));
 
- console.log(park);
-
- var parkCharInd = parkCharNames.indexOf(park.replace( / /g, "_"));
-console.log(parkCharInd);
 
   console.log(previous);
   console.log(next);
+
+var char = parkChar[parkCharInd];
+console.log(char);
+  var area = Math.floor(char["NPS_Fee_Acres"]);
+  var visitors = char["y2018"];
+  console.log(area);
+  console.log(visitors);
+
+  d3.select(".visitors").html(`2018 Visitors: ${d3.format(",")(visitors)}`);
+  d3.select(".area").html(`Park Area in Acres: ${d3.format(",")(area)}`);
 
 //display info: number of photos, visitors, area, miles of road, photo of park, violin plot?
 //this should probably all go on the left side
@@ -655,29 +676,12 @@ console.log(parkCharInd);
   //display park name at top, and update previous/next buttons
   $("div.parkname").html("");
   $("div.parkname").append(park.replace(/_/g, " "));
-  $("div.next").html("");
-  $("div.previous").html("");
   $("div.characteristics").html("");
 
-  //no idea why these buttons stopped working
-  if (next != "") $("div.next").append('<button class="skip" id="nextbutton">Next (' + next + ')</button>');
-//  if (previous != "") $("div.previous").append('<button class="skip" id="previousbutton">Previous (' + previous + ')</button>');
-  $(".skip").click(function() {
-   // alert("clicked");
-    if ($(this).attr('id') == 'nextbutton') alert("clicked next");
-   // else if ($(this).attr('id') == "previousbutton") makeMap(previous);
-  });
 
 
 
-  //find park in csv file to retrieve characteristics
-  park = park.replace("National Park", "NP");
-  var index;
-  for (var i = 0; i < parkChar.length; i++) {
-    if (park == parkChar[i].ParkName) index = i;
-  }
-  $("div.characteristics").append("State: " + parkChar[index].State + "<br>");
-  $("div.characteristics").append("Average Yearly Visitors: " + parkChar[index].Average);
+
 
 
 }

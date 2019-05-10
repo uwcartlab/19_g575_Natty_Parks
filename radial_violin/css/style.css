@@ -274,8 +274,10 @@ div.yellowInner {
 
 div.parkChar{
   position: absolute;
-  right: 50px;
+  right: 25px;
   top: 150px;
+  font-size: 12px;
+  text-align: right;
 }
 
 div.sidePhotos {
