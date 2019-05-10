@@ -325,14 +325,6 @@ function drawMapViolin(photos){
                     .attr("transform", function(d){
                         return `translate(0 ${h-h/15})`;
                     });
-              // .on("mouseover", function(d){
-              //         var park = d.key;
-              //           d3.select(this).select("path").attr("fill-opacity", 1);
-              //       })
-              // .on("mouseout", function(d){
-              //         var park = d.key;
-              //           d3.select(this).select("path").attr("fill-opacity", 0.7);
-              //       });
 
             mapViolin.append("path")
                 .datum(function(d){ return(d.value)})     // So now we are working bin per bin
@@ -632,7 +624,6 @@ function makeYellowstoneViolin(){
 //add arrows
 function displayInfo(park) {
   park = park.replace(/_/g, " ");
-//  alert(park);
 
   d3.select("div.mapInfo").style("opacity", 1);
 
@@ -647,13 +638,19 @@ function displayInfo(park) {
     }
   }
 
+console.log(parkChar);
+var parkCharNames = parkChar.map(park=>park.Area_Name);
 
+ console.log(park);
 
-//  alert(next);
+ var parkCharInd = parkCharNames.indexOf(park.replace( / /g, "_"));
+console.log(parkCharInd);
+
+  console.log(previous);
+  console.log(next);
 
 //display info: number of photos, visitors, area, miles of road, photo of park, violin plot?
 //this should probably all go on the left side
-
 
   //display park name at top, and update previous/next buttons
   $("div.parkname").html("");
