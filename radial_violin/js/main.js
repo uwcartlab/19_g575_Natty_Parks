@@ -144,12 +144,16 @@ function getProjection(park) {
 
   var center;
   var coords = park.geometry.coordinates[0];
+  console.log(park.geometry.coordinates);
   center = [(coords[0][0] + coords[1][0]) / 2, (coords[1][1] + coords[2][1]) / 2];
 
   var height = coords[2][1] - coords[1][1];
   var width = coords[1][0] - coords[0][0];
   var parallel_one = coords[1][1] + (1/3)*(height);
   var parallel_two = coords[1][1] + (2/3)*(height);
+
+  console.log(parallel_one);
+  console.log(parallel_two);
 
 
   projection = d3.geoConicEqualArea()
@@ -163,16 +167,25 @@ function getProjection(park) {
   path = d3.geoPath().projection(projection);
   pathPoint = d3.geoPath();
 
-//update scale bar 
-  var scaleBar = d3.geoScaleBar()
-                .projection(projection)
-                .fitSize([width, height], park)
-                .units("miles");
-                 //.left(.45);
-              d3.select("div.mapInfo").selectAll("p").remove();  
-              d3.select("div.mapInfo")
-                  .append("p")
-                  .call(scaleBar);
+  var botLeft = park.geometry.coordinates[0][0];
+  var botRight = park.geometry.coordinates[0][1];
+
+  var botLeftPix = projection(botLeft);
+  var botRightPix = projection(botRight);
+  
+  var distancePix = botRightPix[0]- botLeftPix[0];
+  console.log(distancePix);
+
+  console.log(botLeftPix);
+  console.log(botRightPix);
+  
+  console.log(botLeft);
+  console.log(botRight);
+
+  var distance = d3.geoDistance(botLeft,botRight)*6371000;
+
+  console.log(distance);
+  console.log(distance/distancePix);
 
 }
 
