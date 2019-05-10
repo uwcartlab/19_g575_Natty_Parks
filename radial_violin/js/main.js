@@ -6,6 +6,7 @@ var boxes;
 var parkChar;
 var boundary, path, pathPoint, projection;
 var mapViolin;
+var yellowstone;
 
 var allParkNames  = [];
 //parks with over 5,000 photos
@@ -142,6 +143,8 @@ function backToViolin(){
 //function that makes projection based on park coordinates
 function getProjection(park) {
 
+  console.log(park);
+
   var center;
   var coords = park.geometry.coordinates[0];
   console.log(park.geometry.coordinates);
@@ -188,6 +191,7 @@ function getProjection(park) {
   console.log(distance/distancePix);
 
 }
+
 
 //loads all the photos of a park
 function drawPhotos(photos) {
@@ -413,6 +417,26 @@ function drawMapViolin(photos){
 }
 
 
+function makeYellowstone(){
+
+  console.log(yellowstone);
+
+  var yellowW = $("div.yellowstoneMap").width();
+  var yellowH = $("div.yellowstoneMap").height();
+
+  var yellowstoneSvg = d3.select("div.yellowstoneMap")
+                         .append("svg")
+                         .attr("width", yellowW)
+                         .attr("height", yellowH);
+
+  //getProjection("Yellowstone_National_Park");
+
+
+
+
+}
+
+makeYellowstone();
 
 
 
@@ -511,22 +535,22 @@ var cloudW = $("div.cloud").width();
 var cloudH = $("div.cloud").height();
 
 
-for(var i = 0; i < 5000; i++){
+for(var i = 0; i < 7000; i++){
 
     cloudData.push({
       "uniqueId": i,
-      "r": 2 + Math.random()*0.3
+      "r": 1.7 + Math.random()*0.3
     });
 
-    if(i<200){
+    if(i<1000){
     smallCloudData.push({
       "uniqueId": i,
-      "r": 2 + Math.random()*0.3
+      "r": 1.7 + Math.random()*0.3
     });
     } else {
       bigCloudData.push({
       "uniqueId": i,
-      "r": 2 + Math.random()*0.3
+      "r": 1.7 + Math.random()*0.3
     });
     }
 
@@ -543,13 +567,13 @@ var bigCircles = d3.packSiblings(bigCloudData);
 console.log(bigCircles);
 
 
-for(var t = 0; t < 5000; t++){
-  if(t<200){
+for(var t = 0; t < 7000; t++){
+  if(t<1000){
     allCircles[t]["smallX"] = smallCircles[t].x;
     allCircles[t]["smallY"] = smallCircles[t].y;
   } else {
-    allCircles[t]["bigX"] = bigCircles[t-200].x;
-    allCircles[t]["bigY"] = bigCircles[t-200].y;
+    allCircles[t]["bigX"] = bigCircles[t-1000].x;
+    allCircles[t]["bigY"] = bigCircles[t-1000].y;
   }
 }
 
@@ -559,20 +583,50 @@ console.log(allCircles);
 
 var cloudSvg = d3.select("div.cloud").append("svg")
                   .attr("width", cloudW)
-                  .attr("height", cloudH);
+                  .attr("height", cloudH)
+                  .attr("overflow", "visible");
 
 var cloudCircles =  cloudSvg.append("g")
-                .attr("transform", `translate(${cloudW*2/3} ${cloudH/2})`)
+                .attr("transform", `translate(${cloudW/2} ${cloudH/2})`)
           .selectAll("circle")
               .data(allCircles)
               .enter()
               .append("circle")
-                  .attr("cx", d => d.x)
-                  .attr("cy", d => d.y)
+                  .attr("cx", function(d,i){
+                        if(d["uniqueId"]<1000){
+                          return d.smallX -150;
+                        }else{
+                          return d.bigX + 150;
+                        }
+                    })
+                    .attr("cy", function(d,i){
+                        if(d["uniqueId"]<1000){
+                          return d.smallY ;
+                        }else{
+                          return d.bigY;
+                        }
+                    })
                   .attr("r", d=> d.r-0.75)
                   .attr("fill", "#fff");
 
+var cloudLabelLeft = cloudSvg.select("g").append("text")
+                         .attr("text-anchor", "center")
+                         .text("Distance > 1 mile")
+                         .attr("x", -210)
+                         .attr("y", -80)
+                         .attr("font-size", "1.2em")
+                         .attr("fill", "#fff");
 
+var cloudLabelRight = cloudSvg.select("g").append("text")
+                        .attr("text-anchor", "center")
+                        .text("Distance < 1 mile")
+                        .attr("x", 80)
+                        .attr("y", -175)
+                        .attr("font-size", "1.2em")
+                        .attr("fill", "#fff");
+
+
+/*
 function moveCircles(){
     cloudCircles.transition("breakApart")
                 .duration(2000)
@@ -596,7 +650,7 @@ function moveCircles(){
 setTimeout(function(){
     moveCircles();
 },3000)
-
+*/
 
 
 var data;
@@ -687,7 +741,7 @@ var textArc = violinGroup.append("text")
                           .attr("startOffset", "70%")
                           .attr("fill", "#fff")
                           .style("font-size", "0.8em")
-                          .text("0 kilometers from road");
+                          .text("0 miles from road");
 
 
 
@@ -697,12 +751,14 @@ var textArc = violinGroup.append("text")
 function loadData(){
 
 Promise.all([
+    d3.csv("data/euclidean/Yellowstone_National_Park.csv"),
     d3.json("data/boundaries.json"),
     d3.json("data/boxes.geojson"),
     d3.csv("data/park_characteristics/data/nps_characteristics.csv")
   ])
-  .then(function([boundariesJson, boxesJson, parkCharCsv]){
+  .then(function([yellowstoneCsv, boundariesJson, boxesJson, parkCharCsv]){
     //get park names
+       yellowstone = yellowstoneCsv;
        boundaries = boundariesJson.features;
        boxes = boxesJson.features;
        parkChar = parkCharCsv;

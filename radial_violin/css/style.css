@@ -80,52 +80,32 @@ h4 {
     font-size: 1.4em;
 }
 
-div.scrolly {
-	width:100%;
-  margin-bottom: 300px;
-}
 
 
-article {
-  position: relative;
-  width: 35vw;
-  margin-top: -85vh;
-  margin-left: 4vw;
-  padding-right: 2vw;
-
-}
-
-figure.sticky {
-  position: -webkit-sticky;
-  position: sticky;
-  width: 100vw;
-  margin-left: 0;
-  top: 0;
-}
 
 div.cloud {
-	width: 100vw;
-	height: 100vh;
+  margin-top: 75px;
+	width: 100%;
+	height: 350px;
 }
 
-div.step {
-	/*background-color: rgba(255,255,255,0.05);*/
-	border-radius: 5px;
-}
 
-div.step p {
-	padding: 10px;
-}
-
-div.beforeScrolly {
+div.beforeCloud {
 	margin-top: 75px;
 }
 
-div.beforeScrolly p {
+div.beforeCloud p {
 	margin-top: 25px;
 }
 
+div.afterCloud {
+  margin: 50px;
+}
 
+div.yellowstoneMap {
+  width: 100%;
+  height: 70vh;
+}
 
 
 
