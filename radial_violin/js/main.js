@@ -63,16 +63,19 @@ var parkNames = [
   "Canyonlands_National_Park",
   "Capitol_Reef_National_Park",
   "Carlsbad_Caverns_National_Park",
+  "Channel_Islands_National_Park",
   "Crater_Lake_National_Park",
   "Cuyahoga_Valley_National_Park",
   "Denali_National_Park",
   "Everglades_National_Park",
   "Glacier_Bay_National_Park",
   "Glacier_National_Park",
+  "Grand_Canyon_National_Park",
   "Grand_Teton_National_Park",
   "Great_Smoky_Mountains_National_Park",
   "Haleakala_National_Park",
   `Hawaii_Volcanoes_National_Park`,
+  "Joshua_Tree_National_Park",
   "Kings_Canyon_National_Park",
   "Lassen_Volcanic_National_Park",
   "Mesa_Verde_National_Park",
@@ -197,7 +200,7 @@ function getProjection(park,yellowstone) {
 
   }
 
-  if(name == "Hawaii Volcanoes National Park"){
+  if(name == "Hawaii Volcanoes National Park" ){
 
      projection = d3.geoConicEqualArea()
                       .parallels([parallel_one, parallel_two])
@@ -209,10 +212,33 @@ function getProjection(park,yellowstone) {
 
   }
 
+  if(name == "Joshua Tree National Park"){
+
+     projection = d3.geoConicEqualArea()
+                      .parallels([parallel_one, parallel_two])
+                      .rotate([-center[0],0,0])
+                      .scale(20000 * (0.8/height))
+                   //   .fitSize([w, h], park.geometry)
+                      .center([0,center[1]])
+                      .translate([w/2,h/2]);
+
+  }
+
+  if(name == "Grand Canyon National Park"){
+
+     projection = d3.geoConicEqualArea()
+                      .parallels([parallel_one, parallel_two])
+                      .rotate([-center[0],0,0])
+                      .scale(20000 * (0.8/height))
+                   //   .fitSize([w, h], park.geometry)
+                      .center([0,center[1]])
+                      .translate([w/2,h/2]);
+
+  }
+
 
 
   if(yellowstone){
-    console.log("yellowstone");
 
     projection = d3.geoConicEqualArea()
                       .parallels([parallel_one, parallel_two])
@@ -662,11 +688,10 @@ var parkCharInd = parkCharNames.indexOf(park.replace( / /g, "_"));
   console.log(next);
 
 var char = parkChar[parkCharInd];
-console.log(char);
+
   var area = Math.floor(char["NPS_Fee_Acres"]);
   var visitors = char["y2018"];
-  console.log(area);
-  console.log(visitors);
+
 
   d3.select(".visitors").html(`2018 Visitors: ${d3.format(",")(visitors)}`);
   d3.select(".area").html(`Park Area in Acres: ${d3.format(",")(area)}`);
