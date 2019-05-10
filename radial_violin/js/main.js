@@ -1,5 +1,6 @@
 function wrapper(){
 
+var all = [];
 var sumstat;
 var boundaries;
 var boxes;
@@ -1019,6 +1020,12 @@ var randomLogTransform = d3.scaleLog()
         var parkLength = park.length;
 
         for(var photo of park){
+
+            if(photo.distance>1609.34){
+              all.push(photo.distance);
+            }
+            
+
             photo["name"] = parkName;
              // if(photo.distance == "0"){
              //   photo.distance = 1;
@@ -1066,6 +1073,9 @@ var randomLogTransform = d3.scaleLog()
         sumstat.push(parkSumstat[0]);
 
     }
+
+    console.log(all);
+    console.log(all.length);
 
 console.log(sumstat);
 // set maximum height of a violin
