@@ -147,6 +147,7 @@ function getProjection(park) {
   center = [(coords[0][0] + coords[1][0]) / 2, (coords[1][1] + coords[2][1]) / 2];
 
   var height = coords[2][1] - coords[1][1];
+  var width = coords[1][0] - coords[0][0];
   var parallel_one = coords[1][1] + (1/3)*(height);
   var parallel_two = coords[1][1] + (2/3)*(height);
 
@@ -161,6 +162,18 @@ function getProjection(park) {
 
   path = d3.geoPath().projection(projection);
   pathPoint = d3.geoPath();
+
+//update scale bar 
+  var scaleBar = d3.geoScaleBar()
+                .projection(projection)
+                .fitSize([width, height], park)
+                .units("miles");
+                 //.left(.45);
+              d3.select("div.mapInfo").selectAll("p").remove();  
+              d3.select("div.mapInfo")
+                  .append("p")
+                  .call(scaleBar);
+
 }
 
 //loads all the photos of a park
@@ -393,40 +406,63 @@ function drawMapViolin(photos){
 
 //add arrows
 function displayInfo(park) {
+  park = park.replace(/_/g, " ");
+//  alert(park);
 
   d3.select("div.mapInfo").style("opacity", 1);
 
   //(calculate previous and next park)
   var previous, next;
-  for (var i = 0; i < parks.length; i++) {
-    if (park === parks[i]) {
-      if (i != 0) previous = parks[i-1];
+  for (var i = 0; i < parkNames.length; i++) {
+    if (park === parkNames[i].replace(/_/g, " ")) {
+      if (i != 0) previous = parkNames[i-1].replace(/_/g, " ");
       else previous = "";
-      if (i != parks.length - 1) next = parks[i+1];
+      if (i != parkNames.length - 1) next = parkNames[i+1].replace(/_/g, " ");
       else next = "";
     }
   }
 
-//TODO: display info: number of photos, visitors, area, miles of road, photo of park, violin plot?
+
+
+//  alert(next);
+
+//display info: number of photos, visitors, area, miles of road, photo of park, violin plot?
 //this should probably all go on the left side
-  //console.log(parkChar);
+
 
   //display park name at top, and update previous/next buttons
   $("div.parkname").html("");
   $("div.parkname").append(park.replace(/_/g, " "));
   $("div.next").html("");
   $("div.previous").html("");
+  $("div.characteristics").html("");
+
+  //no idea why these buttons stopped working
   if (next != "") $("div.next").append('<button class="skip" id="nextbutton">Next (' + next + ')</button>');
-  if (previous != "") $("div.previous").append('<button class="skip" id="previousbutton">Previous (' + previous + ')</button>');
+//  if (previous != "") $("div.previous").append('<button class="skip" id="previousbutton">Previous (' + previous + ')</button>');
   $(".skip").click(function() {
-    if ($(this).attr('id') == 'nextbutton') makeMap(next);
-    else if ($(this).attr('id') == 'previousbutton') makeMap(previous);
+   // alert("clicked");
+    if ($(this).attr('id') == 'nextbutton') alert("clicked next");
+   // else if ($(this).attr('id') == "previousbutton") makeMap(previous);
   });
+
+
+
+  //find park in csv file to retrieve characteristics
+  park = park.replace("National Park", "NP");
+  var index;
+  for (var i = 0; i < parkChar.length; i++) {
+    if (park == parkChar[i].ParkName) index = i;
+  }
+  $("div.characteristics").append("State: " + parkChar[index].State + "<br>");
+  $("div.characteristics").append("Average Yearly Visitors: " + parkChar[index].Average);
+
+
 }
 
 //whenever current park is updated, this function is called
 window.makeMap = function(park_name) {
-
+//alert(park_name);
 
   highlight = true;
   //make sure violin is hidden
