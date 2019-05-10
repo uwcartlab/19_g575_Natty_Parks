@@ -16,7 +16,7 @@ p {
 
 div.plot {
 	margin: 0 auto;
-	margin-top: 50vh;
+	margin-top: 50px;
 	width: 100vw;
 	height: 100vh;
   margin-bottom: 100px;
@@ -107,7 +107,9 @@ div.yellowstoneMap {
   height: 70vh;
 }
 
-
+div.afterYellowstoneMap {
+  margin-top: 50px;
+}
 
 
 
@@ -248,9 +250,24 @@ div.violinPhoto p {
   text-align: center;
 }
 
+div.yellowstoneViolin {
+  width: 100%;
+  height: 300px;
+}
 
+div.afterCloud {
+  margin-top:100px;
+}
 
+div.yellowOuter {
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
 
-
-
-
+div.yellowInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}

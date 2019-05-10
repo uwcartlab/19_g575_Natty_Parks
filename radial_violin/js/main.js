@@ -7,6 +7,8 @@ var parkChar;
 var boundary, path, pathPoint, projection;
 var mapViolin;
 var yellowstone;
+var yellowW;
+var yellowH;
 
 var allParkNames  = [];
 //parks with over 5,000 photos
@@ -141,13 +143,13 @@ function backToViolin(){
 
 
 //function that makes projection based on park coordinates
-function getProjection(park) {
+function getProjection(park,yellowstone) {
 
   console.log(park);
 
   var center;
   var coords = park.geometry.coordinates[0];
-  console.log(park.geometry.coordinates);
+  //console.log(park.geometry.coordinates);
   center = [(coords[0][0] + coords[1][0]) / 2, (coords[1][1] + coords[2][1]) / 2];
 
   var height = coords[2][1] - coords[1][1];
@@ -155,8 +157,7 @@ function getProjection(park) {
   var parallel_one = coords[1][1] + (1/3)*(height);
   var parallel_two = coords[1][1] + (2/3)*(height);
 
-  console.log(parallel_one);
-  console.log(parallel_two);
+
 
 
   projection = d3.geoConicEqualArea()
@@ -166,6 +167,19 @@ function getProjection(park) {
                    //   .fitSize([w, h], park.geometry)
                       .center([0,center[1]])
                       .translate([w/2,h/2]);
+
+  if(yellowstone){
+    console.log("yellowstone");
+
+    projection = d3.geoConicEqualArea()
+                      .parallels([parallel_one, parallel_two])
+                      .rotate([-center[0],0,0])
+                      .scale(35000 * (0.7/height))
+                   //   .fitSize([w, h], park.geometry)
+                      .center([0,center[1]])
+                      .translate([yellowW/2,yellowH/2]);
+
+  }
 
   path = d3.geoPath().projection(projection);
   pathPoint = d3.geoPath();
@@ -177,24 +191,26 @@ function getProjection(park) {
   var botRightPix = projection(botRight);
   
   var distancePix = botRightPix[0]- botLeftPix[0];
-  console.log(distancePix);
+  // console.log(distancePix);
 
-  console.log(botLeftPix);
-  console.log(botRightPix);
+  // console.log(botLeftPix);
+  // console.log(botRightPix);
   
-  console.log(botLeft);
-  console.log(botRight);
+  // console.log(botLeft);
+  // console.log(botRight);
 
   var distance = d3.geoDistance(botLeft,botRight)*6371000;
 
-  console.log(distance);
-  console.log(distance/distancePix);
+  // console.log(distance);
+  // console.log(distance/distancePix);
 
 }
 
 
 //loads all the photos of a park
 function drawPhotos(photos) {
+
+  console.log(photos);
  // photos=photos.features;
 
   for(photo of photos){
@@ -419,26 +435,242 @@ function drawMapViolin(photos){
 
 function makeYellowstone(){
 
-  console.log(yellowstone);
 
-  var yellowW = $("div.yellowstoneMap").width();
-  var yellowH = $("div.yellowstoneMap").height();
+   yellowW = $("div.yellowstoneMap").width();
+   yellowH = $("div.yellowstoneMap").height();
 
   var yellowstoneSvg = d3.select("div.yellowstoneMap")
                          .append("svg")
                          .attr("width", yellowW)
                          .attr("height", yellowH);
 
-  //getProjection("Yellowstone_National_Park");
+  var boxInd = allParkNames.indexOf("Yellowstone_National_Park");
+  console.log(boxInd);
+
+  //set projection for yellowstone
+  getProjection(boxes[boxInd],true);
+
+  var parkBoundary = boundaries[boxInd];
+
+  //draw boundary for yellowstone
+    yellowstoneSvg.selectAll(".boundary")
+      .data([parkBoundary])
+      .enter()
+      .append("path")
+      .attr("d", path)
+      .attr("fill", "none")
+      .attr("stroke", "#888")
+      .attr("stroke-width", 1)
+      .style("filter", "url(#glow)");
+
+  yellowstoneSvg.selectAll(".boundary")
+      .data([parkBoundary])
+      .enter()
+      .append("path")
+      .attr("d", path)
+      .attr("id", "clip-area")
+      .attr("fill", "#111")
+      .attr("opacity", 0.5)
+      .attr("stroke", "#aaa")
+      .attr("stroke-width", 0.25);
+
+
+  var photos = yellowstone;
+  //draw photos for yellowstone
+  for(photo of photos){
+     point=projection([photo.long,photo.lat]);
+      photo.x= point[0];
+      photo.y= point[1];
+    }
+
+  radiusScale.domain(d3.extent(hexbin(photos),bin => bin.length));
+  logScale.domain(d3.extent(hexbin(photos),bin => bin.length));
+
+           
+//hexagons:
+  yellowstoneSvg.append("g")
+        .attr("class", "hexagon")
+        .selectAll(".hex")
+        .data(hexbin(photos))
+        .enter()
+        .append("path")
+        .attr("d", function(d){
+          return hexbin.hexagon(0.8);
+        })
+        .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+        .attr("fill", function(d){
+          return colorScale(logScale(d.length));
+        })
+        .attr("opacity", 1);
+
+
+}
+
+function makeYellowstoneViolin(){
+
+  //add svg
+  yellowW = $("div.yellowstoneViolin").width();
+  yellowH = $("div.yellowstoneViolin").height();
+
+  var yellowstoneViolinSvg = d3.select("div.yellowstoneViolin")
+                         .append("svg")
+                         .attr("width", yellowW)
+                         .attr("height", yellowH);
+
+  var yellowSumstat = [];
+
+  console.log(yellowstone);
+  var ind = parkNames.indexOf("Yellowstone_National_Park");
+
+
+    var park = yellowstone;
+    var parkName = parkNames[ind];
+    var parkLength = park.length;
+
+  var m = 50;
+  var r = Math.min(yellowW,yellowH)/2-m;
+
+
+
+        for(var photo of park){
+            photo["name"] = parkName;
+
+        }
+
+
+
+    var domMax = d3.max(park.map(photo => +photo.distance));
+
+
+     var log = d3.scaleLinear()
+                    .domain([0,domMax])
+                    //.base(10)
+                    .range([yellowW/2,yellowW/2+r/2]);
+
+
+      var histogram = d3.histogram()
+        .domain(log.domain()) //domain
+        .thresholds(log.ticks(100))  //number of bins
+        .value(d => d); //value accessor
+
+      var parkSumstat = d3.nest()  // nest function allows to group the calculation per level of a factor
+        .key(function(d) { return d.name})
+        .rollup(function(d) {   // For each key..
+          input = d.map(function(g) { return +g.distance;})    // Keep the variable called Sepal_Length
+         // console.log(input);
+          bins = histogram(input)   // And compute the binning on it.
+          return(bins)
+        })
+        .entries(park);
+
+        //calculate max number in a bin for each park
+        var maxNum = 0;
+        for (var i in parkSumstat ){
+             var allBins = parkSumstat[i].value
+             var lengths = allBins.map(function(a){return a.length;})
+             var longest = d3.max(lengths)
+              if (longest > maxNum) { maxNum = longest }
+        }
+
+        //console.log(maxNum);
+        parkSumstat[0]["maxNum"] = maxNum;
+        parkSumstat[0]["xDom"] = log.domain();
+        parkSumstat[0]["parkLength"] = parkLength;
+
+        yellowSumstat.push(parkSumstat[0]);
+
+        console.log(yellowSumstat);
+
+
+  var photos = yellowSumstat[0];
+  
+  var xScale = d3.scaleLinear()
+                    .range([yellowW/4, yellowW-yellowW/4]);
+
+  var yNum = d3.scaleSqrt()
+    .range([0, 75]);
+
+  var length = photos.parkLength;
+  console.log(length);
+
+    //height of violin proportional to total
+    yNum.domain([0, 0.5]);
+    xScale.domain(photos.xDom);
+
+
+    //calculate max distance from road in miles
+  var max = (photos.xDom[1]*0.000621371).toFixed(0);
+
+//build groups
+    var yellowstoneViolin =  yellowstoneViolinSvg.append("g")
+           .datum(photos)
+              .attr("parkLength", function(d){
+                        return d.parkLength;
+              })
+              .attr("id", "yellowstoneMapViolin")
+                    .attr("transform", function(d){
+                        return `translate(0 ${yellowH/2})`;
+                    });
+              // .on("mouseover", function(d){
+              //         var park = d.key;
+              //           d3.select(this).select("path").attr("fill-opacity", 1);
+              //       })
+              // .on("mouseout", function(d){
+              //         var park = d.key;
+              //           d3.select(this).select("path").attr("fill-opacity", 0.7);
+              //       });
+
+            yellowstoneViolin.append("path")
+                .datum(function(d){ return(d.value)})     // So now we are working bin per bin
+                    .style("stroke", "none")
+                    .style("fill","#c9d1ff")
+                    .attr("fill-opacity", 0.7)
+                    .attr("d", d3.area()
+                                        .y0(function(d){ 
+                                          return(-1*yNum(d.length/length));
+                                        })
+                                        .y1(function(d){ 
+                                          return(yNum(d.length/length)); 
+                                        })
+                                        .x(function(d){ 
+                                          return(xScale(d.x0)); 
+                                        })
+                                        .curve(d3.curveCatmullRom)
+                                        );
+
+                var axis = yellowstoneViolin.append("rect")
+                          .attr("class", "mapViolin")
+                          .attr("width", yellowW/2)
+                          .attr("height", 0.5)
+                          .attr("x", w/4)
+                          .attr("y", 0)
+                          .attr("fill", "#fff");
+
+                var labelLeft = d3.select("div.yellowInner")
+                                  .append("p")
+                                  .attr("class", "mapViolin")
+                                  .style("position", "absolute")
+                                  .style("left", yellowW/4-55+"px")
+                                  .style("top",yellowH/2-15+"px")
+                                  .style("width", "50px")
+                                  .style("font-size", "12px")
+                                  .style("text-align", "right")
+                                  .html(`0 miles from road`);
+
+                var labelRight = d3.select("div.yellowInner")
+                                  .append("p")
+                                  .attr("class", "mapViolin")
+                                  .style("position", "absolute")
+                                  .style("left", yellowW-yellowW/4+5+"px")
+                                  .style("top",yellowH/2-15+"px")
+                                  .style("width", "50px")
+                                  .style("font-size", "12px")
+                                  .html(`${max} miles from road`);                
 
 
 
 
 }
-
-makeYellowstone();
-
-
 
 
 //add arrows
@@ -558,13 +790,13 @@ for(var i = 0; i < 7000; i++){
 
 
 var allCircles = d3.packSiblings(cloudData);
-console.log(allCircles);
+
 
 var smallCircles = d3.packSiblings(smallCloudData);
-console.log(smallCircles);
+
 
 var bigCircles = d3.packSiblings(bigCloudData);
-console.log(bigCircles);
+
 
 
 for(var t = 0; t < 7000; t++){
@@ -576,8 +808,6 @@ for(var t = 0; t < 7000; t++){
     allCircles[t]["bigY"] = bigCircles[t-1000].y;
   }
 }
-
-console.log(allCircles);
 
               
 
@@ -766,10 +996,13 @@ Promise.all([
     for(var box of boxes){
       allParkNames.push(box.properties["UNIT_NAME"].replace( / /g, "_"));
     }
+
+    makeYellowstone();
+    makeYellowstoneViolin();
     // //get json urls
     // var files = [];
     // for(var park of parkNames){
-    //    // console.log(park)
+    //    // .log(park)
     //     files.push(`data/photos/${park}.json`);
     //}
     //get csv urls
@@ -962,7 +1195,6 @@ for(var i; i<sumstat.length; i++){
                                 var a = i*rotateConst + rotateConst/2 - 90;
                                 if(a>90 && a <= 270){
                                   var length = d3.select(this).node().getComputedTextLength();
-                                  console.log(length);
                                   tran = (-2*r-length-10,-2*r-length-10);
                                   //tran = ("10,10")
                                   return `rotate(180,0,0)
